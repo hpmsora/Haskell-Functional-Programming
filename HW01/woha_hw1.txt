@@ -1,0 +1,131 @@
+Won Yong Ha (woha)
+B490 Homework 1
+
+1. Beta-Reductions and Eta-Reductions
+(1)
+	(\x. \y. x-y) 3
+	-> (\y. 3-y)
+	-> 3-y
+
+(2)
+	((lambda (f) (lambda (x y) (f y x))) (lambda (x1 y1) (- x1 y1)))
+	-> ((lambda (x y) ((lambda (x1 y1) (- x1 y1)) y x))
+	-> (lambda (x y) (- y x))
+
+(3)
+	(\f. \x. \y. (f y) x) (\x1. \y1. x1-y1) 3
+	-> (\x. \y. (((\x1. \y1. x1-y1) 3) y) x)
+	-> (\x. \y. ((\y1. 3-y1) y) x)
+	-> (\x. \y1. (3-y1) x)
+	-> (\x. (3-x))
+	-> 3-x
+
+(4)
+	((lambda (x) (lambda (y)  (- x y))) y1)
+	-> (lambda (y)  (- y1 y))
+	-> (- y1 y)
+
+(5)
+	(\fx. f (f x)) (\fxy. f y x)
+	-> (\f. \x. f (f x)) (\f1. \x1. \y1. f1 y1 x1)
+	-> (\x. (\f1. \x1. \y1. f1 y1 x1) ((\f1. \x1. \y1. f1 y1 x1) x)
+	-> (\x. (\x1. \y1. ((\f1. \x1. \y1. f1 y1 x1) x) y1 x1) x)
+	-> (\x. (\x1. \y1. (\x1. \y1. x y1 x1) y1 x1) x)
+	-> (\x. (\x1. (x x1) x))
+	-> (\x. x x)
+	
+(6)
+	(\fx3. f (f x3)) (\fx2y2. f y2 x2) (\x1. \y1. x1-y1) 3
+	-> (\fx3. f (f x3)) (\fx2y2. f y2 x2) (\y1. 3-y1)
+	-> (\fx3. f (f x3)) (\x2y2. (\y1. 3-y1) y2 x2)
+	-> (\fx3. f (f x3)) (\x2y2. (\y1. 3-y1) (y2 x2)
+	-> f(f x3) (\x2y2. (\y1. 3-y1) (y2 x2)
+	-> f(f x3) (\y1. 3-y1)
+
+(7)
+	(\fx. f (f x)) ((\fxy. f y x) (\x. \y. x-y) 3)
+	-> (\fx. f (f x)) ((\fxy. f y x) (\y. 3-y))
+	-> (\fx. f (f x)) (\xy. (\y. 3-y) y x)
+	-> (\x. (\xy. (\y. 3-y) y x) ((\xy. (\y. 3-y) y x) x))
+	-> (\x. (\xy. (\y. 3-y) y x) (\y. (\y. 3-y) y x))
+	-> (\x. (\y. (\y. 3-y) (y (\y. (\y. 3-y) y x))))
+	-> (\x. (\y. (\y. 3-y) (\y. 3-y) y x))
+	-> (\x. (\y. 3-y (y x)))
+
+(8)
+	((lambda (f) (f f)) y)
+	-> ((lambda (f) (f f)) y)
+
+(9)
+	((lambda (sqr) (lambda (x y) (sqrt (+ (sqr x) (sqr y))))) (lambda (x) (* x x)))
+	-> (lambda (x y) (sqrt (+ (* x x) (* y y))))
+	-> (sqrt (+ (* x x) (* y y)))
+
+(10)
+	(let ((sqr (lambda (x) (* x x)))) (lambda (x y) (sqrt (+ (sqr x) (sqr y)))))
+	-> (lambda (x y) (sqrt (+ (* x x) (* y y))))
+	-> (sqrt (+ (* x x) (* y y)))
+
+2. Equivalence
+(11)
+	No
+	((\x. \y. x-y) 3) -> (\y. 3-y)
+
+(12)
+	Yes
+	((\x. \y. x-y) 3) -> (\y. 3-y)
+
+(13)
+	No
+	(lambda (x) (lambda (y) x)) => x: bounded by first lambda
+	(lambda (x) (lambda (x) x)) => x: bounded by second lambda
+
+(14)
+	No
+	(\x. x-y) => y
+	(\x. x-z) => z
+	Both variable y and z can be difference.
+
+(15)
+	Yes
+	(lambda (x) ((f 3) x)) -> (f 3)
+
+(16)
+	Yes
+	(\x. \y. x+y)
+	((\f. \x. \y. (f y) x) (\x. \y. x+y))
+	-> (\x. \y1. ((\x. \y. x+y) y1) x)
+	-> (\x. \y1. (\y. y1+y) x)
+	-> (\x. (\y x+y))
+
+3. Program Calculation
+(17)
+	(append-reverse '() ys)
+	-> (append (reverse '()) ys)
+	-> (append '() ys)
+	-> ys
+
+(18)
+	(append-reverse (cons x xs) ys)
+	-> (append (reverse (cons x xs) ys))
+	-> (lambda (x y) (__)) ((cons x xs) ys)
+	-> (lambda (x y) (cons (lambda (z) (__) x) (cons y '()))) ((cons x xs) ys)
+	-> (lambda (x y) (cons ((lambda (l)(let ((len (length l)))
+					(build-list len
+					(lambda (i)
+						(list-ref l (- len i 1))))))x) (cons y '()))) ((cons x xs) ys)
+	-> Substitute of "__" from last line from the external sources.
+	
+(19)
+	(define append-reverse-recur
+		(lambda (xs ys)
+			(cond
+				[(null? xs) ys]
+				[else (cons (append-reverse-recur (cdr xs) ys) (car cs))]
+				)))
+
+(20)
+	(define reverse-new
+		(lambda (xs)
+			(append-reverse-recur xs '())
+			))
